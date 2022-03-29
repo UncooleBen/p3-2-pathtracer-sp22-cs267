@@ -141,9 +141,9 @@ namespace CGL { namespace SceneObjects {
     // TODO: 3-2 Part 3 Task 1
     // Use the helper functions to convert r.d into (x,y)
     // then bilerp the return value
-
-    return Vector3D();
-
+    Vector3D dir = r.d;
+    Vector2D xy = theta_phi_to_xy(dir_to_theta_phi(dir));
+    return bilerp(xy);
   }
 
 } // namespace SceneObjects
