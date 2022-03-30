@@ -1,60 +1,113 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
-<style>  
-    div.padded {  
-      padding-top: 0px;  
-      padding-right: 100px;  
-      padding-bottom: 0.25in;  
-      padding-left: 100px;  
-    }  
-  </style> 
-<title>Your Name  |  CS 184</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+    <style>
+        div.padded {
+            padding-top: 0px;
+            padding-right: 100px;
+            padding-bottom: 0.25in;
+            padding-left: 100px;
+        }
+    </style>
+    <title>Yang Huang, Juntao Peng | CS 284A</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
 </head>
+
 <body>
-<br />
-<h1 align="middle">Assignment 3: PathTracer</h1>
-    <h2 align="middle">Your Name</h2>
+    <br />
+    <h1 align="middle">Assignment 3: PathTracer</h1>
+    <h2 align="middle">Yang Huang, Juntao Peng</h2>
 
     <div class="padded">
-        <p>Use this section to write an overview of the assignment. All of the text in your write-up should be <em>in your own words</em>. If you need to add additional HTML features to this document, you can search the <a href="http://www.w3schools.com/">http://www.w3schools.com/</a> website for instructions. To edit the HTML, you can just copy and paste existing chunks and fill in the text and image file names appropriately.</p>
-        <o>The website writeup is intended to be a self-contained walkthrough of the assignment: we want this to be a piece of work which showcases your understanding of relevant concepts through both mesh images as well as written explanations about what you did to complete each part of the assignment. Try to be as clear and organized as possible when writing about your own output files or extensions to the assignment. We want to understand what you've achieved and how you've done it!</p> 
-        <p>If you are well-versed in web development, feel free to ditch this template and make a better looking page. Just make sure that you include all the components as we've laid them out here. </p>
-
-    <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
+        <p>In assignment 3-2 we first implemented PLACEHOLDER in part 1. Then we chose part 3 as out second part where
+            we implemented environment light using uniform sphere sampling and inversion-based importance sampling.</p>
+        <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
         <p>Describe what you did in Part 1. etc...</p>
         <div align="center">
             <table style="width=100%">
                 <tr>
                     <td align="middle">
-                    <img src="images/example_image.png" width="480px" />
-                    <figcaption align="middle">Results Caption: my bunny is the bounciest bunny</figcaption>
+                        <img src="images/example_image.png" width="480px" />
+                        <figcaption align="middle">Results Caption: my bunny is the bounciest bunny</figcaption>
                 </tr>
             </table>
         </div>
-        <p>Here is an example of how to include a simple formula:</p>
-        <p align="middle"><pre align="middle">a^2 + b^2 = c^2</pre></p>
-        <p>or, alternatively, you can include an SVG image of a LaTex formula.</p>
-        <p>This time it's your job to copy-paste in the rest of the sections :)</p>
 
-
-
-    <h2 align="middle">A Few Notes On Webpages</h2>
-        <p>Here are a few problems students have encountered in the past. You will probably encounter these problems at some point, so don't wait until right before the deadline to check that everything is working. Test your website on the instructional machines early!</p>
-        <ul>
-        <li>Your main report page should be called index.html.</li>
-        <li>Be sure to include and turn in all of the other files (such as images) that are linked in your report!</li>
-        <li>Use only <em>relative</em> paths to files, such as <pre>"./images/image.jpg"</pre>
-        Do <em>NOT</em> use absolute paths, such as <pre>"/Users/student/Desktop/image.jpg"</pre></li>
-        <li>Pay close attention to your filename extensions. Remember that on UNIX systems (such as the instructional machines), capitalization matters. <pre>.png != .jpeg != .jpg != .JPG</pre>
-        <li>Be sure to adjust the permissions on your files so that they are world readable. For more information on this please see this tutorial: <a href="http://www.grymoire.com/Unix/Permissions.html">http://www.grymoire.com/Unix/Permissions.html</a></li>
-        <li>And again, test your website on the instructional machines early!</li>
-</div>
+        <h2 align="middle">Part 3: Environment Light</h2>
+        <p>In part 3 we first write a <code>sample_dir</code> function with which we can trace along the direction of
+            a ray until we find the meet point on the environment map. This is achieved by converting global direction
+            to theta-phi representation and then convert the angle to environment map using a lerp operation.</p>
+        <p>The second task of part 3 is uniform sphere sampling. We write <code>sample_L</code> function with which we
+            can sample a uniformly random direction from a hitpoint and find the corresponding xy value on the
+            environment map.</p>
+        <p>The third task of part 3 is importance sampling using inversion method. We first update the <code>init</code>
+            function by storing
+            <code>pdf_envmap</code> with the environment map's pixel value and then normalize it. Then we compute the
+            marginal cumulative density function in <code>marginal_y</code>, which is a row-wise summation of
+            <code>pdf_envmap</code> along the width axis. The last step in the <code>init</code> function is to compute
+            <code>cond_y</code> by dividing values in <code>pdf_envmap</code> by the neighbor difference of
+            <code>marginal_y</code> (this will give us the true probability of P(y)).
+        </p>
+        <p>After finishing <code>init</code> function, we need to update <code>sample_L</code> with importance sampling.
+            <br>
+            1. We first perform a 2D uniform sampling from [0, 1). <br>
+            2. Then use the value of <code>sample[1]</code> to
+            inversely importance sample from the marginal distribution of y. This is achieved by using
+            <code>std::upper_bound</code> to compute the index of the next larger cumulative probability density. <br>
+            3. After getting a fixed y-value, we repeat the inversion sampling on the conditional distribution of x
+            given y
+            to get x-value. <br>
+            4. Once we get the xy combination, we lerp it on the environment map, and convert it to the
+            world direction. <br>
+            5. Finally we set the value of pdf pointer to P(y) * P(x|y) and then multiply it by
+            <code>w * h / (2 * PI * PI * sin(theta))</code>.
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/part3-1.png" width="480px" />
+                        <figcaption align="middle">Importance Density of field.exr</figcaption>
+                </tr>
+            </table>
+        </div>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/part3-2.png" width="480px" />
+                        <figcaption align="middle">Bunny using uniform sphere sampling</figcaption>
+                    <td align="middle">
+                        <img src="images/part3-3.png" width="480px" />
+                        <figcaption align="middle">Bunny using importance sampling</figcaption>
+                </tr>
+            </table>
+        </div>
+        <p>
+            When rendering our bunny the noise in uniform sphere sampling is higher than the one in importance sampling.
+            We
+            can see black dots on the surface of the left bunny.
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/part3-4.png" width="480px" />
+                        <figcaption align="middle">Dragon using uniform sphere sampling</figcaption>
+                    <td align="middle">
+                        <img src="images/part3-5.png" width="480px" />
+                        <figcaption align="middle">Dragon using importance sampling</figcaption>
+                </tr>
+            </table>
+        </div>
+        <p>
+            When rendering our dragon the noise level are nearly the same in both pictures. This is probabily because
+            there is more polygons in the dragon mesh so that the ray samples are more likely to hit the model and thus
+            gives back a valid radiance from the environment light source.
+        </p>
+    </div>
 </body>
+
 </html>
-
-
-
-
