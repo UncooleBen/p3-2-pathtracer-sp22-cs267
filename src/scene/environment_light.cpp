@@ -1,5 +1,6 @@
 #include "environment_light.h"
 #include "util/lodepng.h"
+#include <iomanip>
 
 namespace CGL { namespace SceneObjects {
 
@@ -35,9 +36,37 @@ namespace CGL { namespace SceneObjects {
         sum += pdf_envmap[w * j + i];
       }
     }
-
-
-
+    // Normalize with sum
+    for (int j = 0; j < h; ++j) {
+      for (int i = 0; i < w; ++i) {
+        pdf_envmap[w * j + i] /= sum;
+      }
+    }
+    // Compute marginal p(y)
+    for (int j = 0; j < h; ++j) {
+      if (j == 0) {
+        marginal_y[j] = 0.0;
+      } else {
+        marginal_y[j] = marginal_y[j-1];
+      }
+      for (int i = 0; i < w; ++i) {
+        marginal_y[j] += pdf_envmap[w * j + i];
+      }
+    }
+    // Compute conditional p(x|y)
+    for (int j = 0; j < h; ++j) {
+      double py;
+      if (j == 0) {
+        py = marginal_y[j];
+      } else {
+        py = marginal_y[j] - marginal_y[j-1];
+      }
+      double accumulated_cond_y = 0.0;
+      for (int i = 0; i < w; ++i) {
+        conds_y[w * j + i] = accumulated_cond_y;
+        accumulated_cond_y += pdf_envmap[w * j + i] / py;
+      }
+    }
 
     if (true)
       std::cout << "Saving out probability_debug image for debug." << std::endl;
@@ -126,13 +155,40 @@ namespace CGL { namespace SceneObjects {
     // TODO: 3-2 Part 3 Tasks 2 and 3 (step 4)
     // First implement uniform sphere sampling for the environment light
     // Later implement full importance sampling
-
+    *distToLight = INF_D;
+#define IMPORTANCE_SAMPLEING 1
+#ifndef IMPORTANCE_SAMPLEING
     // Uniform
     *wi = sampler_uniform_sphere.get_sample();
-    *distToLight = INF_D;
     *pdf = 1.0 / (4.0 * PI);
-
     return bilerp(theta_phi_to_xy(dir_to_theta_phi(*wi)));
+#else
+    Vector2D sample_2d = sampler_uniform2d.get_sample();
+    while (sample_2d.x == 1 || sample_2d.y == 1) {
+      sample_2d = sampler_uniform2d.get_sample();
+    }
+    uint32_t w = envMap->w, h = envMap->h;
+    double F_x_given_y = sample_2d.x, F_y = sample_2d.y;
+    size_t j = std::upper_bound(marginal_y, marginal_y + h, F_y) - marginal_y;
+    double py;
+    if (j == 0) {
+      py = marginal_y[j];
+    } else {
+      py = marginal_y[j] - marginal_y[j - 1];
+    }
+    size_t i = std::upper_bound(conds_y + w * j, conds_y + w * (j + 1), F_x_given_y) - (conds_y + w * j);
+    double px_given_y;
+    if (i == w) {
+      px_given_y = 1.0 - conds_y[w * j + i - 1];
+    } else {
+      px_given_y = conds_y[w * j + i] - conds_y[w * j + i - 1];
+    }
+    Vector2D i_j(i, j);
+    Vector2D theta_phi = xy_to_theta_phi(i_j);
+    *wi = theta_phi_to_dir(theta_phi);
+    *pdf = py * px_given_y * w * h / (2 * PI * PI * sin(theta_phi[0]));
+    return bilerp(i_j);
+#endif
   }
 
   Vector3D EnvironmentLight::sample_dir(const Ray& r) const {
