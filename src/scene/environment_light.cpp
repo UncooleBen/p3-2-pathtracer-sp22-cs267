@@ -20,6 +20,7 @@ namespace CGL { namespace SceneObjects {
     pdf_envmap = new double[w * h];
     conds_y = new double[w * h];
     marginal_y = new double[h];
+    double *acc_y = new double[h];
 
     std::cout << "[PathTracer] Initializing environment light...";
 
@@ -35,9 +36,30 @@ namespace CGL { namespace SceneObjects {
         sum += pdf_envmap[w * j + i];
       }
     }
-
-
-
+    //Step1:
+    for (int j = 0; j < h; ++j) {
+      for (int i = 0; i < w; ++i) {
+        pdf_envmap[w * j + i] = pdf_envmap[w * j + i]/sum;
+      }
+    }
+    //Step2:
+    for (int j = 0; j < h; ++j) {
+      for (int i = 0; i < w; ++i) {
+        marginal_y[j] +=  pdf_envmap[w * j + i];     
+      }
+      acc_y[j] = marginal_y[j];
+    }
+    for(int j =1; j < h; ++j){
+      marginal_y[j] += marginal_y[j-1];
+    }
+    //Step3:
+    for (int j = 0; j < h; ++j) {
+      for (int i = 0; i < w; ++i) {
+        for(int m = 0; m< i; ++m){
+        conds_y [w * j + i] += pdf_envmap[w * j + m]/acc_y[j];
+        }
+      }
+    }
 
     if (true)
       std::cout << "Saving out probability_debug image for debug." << std::endl;
@@ -128,21 +150,24 @@ namespace CGL { namespace SceneObjects {
     // Later implement full importance sampling
 
     // Uniform
-    *wi = sampler_uniform_sphere.get_sample();
-    *distToLight = INF_D;
-    *pdf = 1.0 / (4.0 * PI);
+    // *wi = sampler_uniform_sphere.get_sample();
+    // *distToLight = INF_D;
+    // *pdf = 1.0 / (4.0 * PI);
+    // return bilerp(theta_phi_to_xy(dir_to_theta_phi(*wi)));
+    Vector2D Sample2D = sampler_uniform2d.get_sample();
+    
 
-
-
-    return Vector3D();
   }
 
   Vector3D EnvironmentLight::sample_dir(const Ray& r) const {
     // TODO: 3-2 Part 3 Task 1
     // Use the helper functions to convert r.d into (x,y)
     // then bilerp the return value
-
-    return Vector3D();
+    Vector2D theta_phi;
+    theta_phi =  dir_to_theta_phi(r.d);
+    Vector2D xy;
+    xy = theta_phi_to_xy(theta_phi);
+    return bilerp(xy);
 
   }
 
