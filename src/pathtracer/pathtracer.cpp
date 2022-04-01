@@ -94,7 +94,7 @@ PathTracer::estimate_direct_lighting_hemisphere(const Ray &r,
   L_out *= 2 * PI;
   // Average out num_samples
   L_out /= num_samples;
-  return L_out ;
+  return L_out;
 }
 
 Vector3D
@@ -148,7 +148,7 @@ PathTracer::estimate_direct_lighting_importance(const Ray &r,
   }
 
   L_out /= num_samples;
-  return L_out ;
+  return L_out;
 }
 
 Vector3D PathTracer::zero_bounce_radiance(const Ray &r,
@@ -230,7 +230,6 @@ Vector3D PathTracer::est_radiance_global_illumination(const Ray &r) {
   L_out = (isect.t == INF_D) ? debug_shading(r.d) : normal_shading(isect.n);
   return L_out;
 #endif
-
   switch (max_ray_depth)
   {
   case 0:
