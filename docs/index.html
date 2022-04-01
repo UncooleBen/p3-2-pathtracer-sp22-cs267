@@ -23,19 +23,70 @@
     <div class="padded">
         <p>In assignment 3-2 we first implemented PLACEHOLDER in part 1. Then we chose part 3 as out second part where
             we implemented environment light using uniform sphere sampling and inversion-based importance sampling.</p>
-        <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
-        <p>Show a sequence of six images of scene CBspheres.dae rendered with max_ray_depth set to 0, 1, 2, 3, 4, 5, and 100. The other settings should be at least 64 samples per pixel and 4 samples per light.
+        <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>Show a sequence of six images of scene CBspheres.dae rendered with max_ray_depth set to 0, 1, 2, 3, 4, 5, and 100. 
+            The other settings should be at least 64 samples per pixel and 4 samples per light.
             Point out the new multibounce effects that appear in each image.
             Explain how these bounce numbers relate to the particular effects that appear..</p>
-        <div align="center">
-            <table style="width=100%">
-                <tr>
-                    <td align="middle">
-                        <img src="images/example_image.png" width="480px" />
-                        <figcaption align="middle">Results Caption: my bunny is the bounciest bunny</figcaption>
-                </tr>
-            </table>
-        </div>
+        <p> Point out the new multibounce effects that appear in each image.
+            When m = 0, we can only see the cornell box since no bounce so we can only see light from area light.<br>
+            When m = 1, there is one bounce from the light reflecting off the spheres and towards the camera.<br>
+            When m = 2, we see a light that bounces off the wall into the left sphere that is then bounced into the camera.
+            We can also notice a bright ceiling in image but a dark ceiling in the reflection of left sphere.
+            Also, we start to see some reflected light in the right sphere but the shadow is still pure black. <br>
+            When m = 3, we start to see the ceiling in the left sphere due to light bouncing off the floor and wall back to the ceiling and off the left sphere into the camera.
+            However, the reflection of right sphere in left sphere is still black.<br>
+            When m = 4, we can see a realistic reflection of right sphere in left sphere and also notice a small transparent shadow in right wall.
+            From m = 5 to 100, we can see a more and more realistic reflection of mirror and glass material. We can gradually see the reflection of right sphere in left sphere,
+            see a transparent shadow on right wall, see a smooth shadow caused by refraction in right sphere. <br> 
+        </p>
+
+        <p> Explain how these bounce numbers relate to the particular effects that appear..</p>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_0.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 0, 256 samples per pixel, 4 samples per light</figcaption>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_1.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 0, 256 samples per pixel, 4 samples per light</figcaption>
+                    </tr>
+                </table>
+            </div>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_2.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 2, 256 samples per pixel, 4 samples per light</figcaption>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_3.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 3, 256 samples per pixel, 4 samples per light</figcaption>
+                    </tr>
+                </table>
+            </div>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_4.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 4, 256 samples per pixel, 4 samples per light</figcaption>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_5.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 5, 256 samples per pixel, 4 samples per light</figcaption>
+                    </tr>
+                </table>
+            </div>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                            <img src="images/spheres_s_256_m_100.png" width="480px" />
+                            <figcaption align="middle">max_ray_depth = 100, 256 samples per pixel, 4 samples per light</figcaption>
+                    </tr>
+                </table>
+            </div>
 
         <h2 align="middle">Part 3: Environment Light</h2>
         <p>In part 3 we first write a <code>sample_dir</code> function with which we can trace along the direction of
