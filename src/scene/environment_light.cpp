@@ -21,6 +21,7 @@ namespace CGL { namespace SceneObjects {
     pdf_envmap = new double[w * h];
     conds_y = new double[w * h];
     marginal_y = new double[h];
+    double *acc_y = new double[h];
 
     std::cout << "[PathTracer] Initializing environment light...";
 
