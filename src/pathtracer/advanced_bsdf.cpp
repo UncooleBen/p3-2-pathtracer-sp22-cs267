@@ -156,12 +156,10 @@ Vector3D GlassBSDF::sample_f(const Vector3D wo, Vector3D* wi, double* pdf) {
 
     if (std::rand() / (double)RAND_MAX <= Fr) {    // If we choose reflection
         reflect(wo, wi);
-        // Here we don't need to multiply Fr because we already using randomized strategy to achieve it.
         return reflectance * (1/std::max(std::fabs((*wi)[2]),1e-8));
     }
     else{                      
         double ratio = no/ni;
-        // Here we don't need to multiply (1-Fr) because we already using randomized strategy to achieve it.
         return transmittance * ratio*ratio * (1/std::max(std::fabs((*wi)[2]),1e-8));
     }
 }

@@ -94,7 +94,7 @@ PathTracer::estimate_direct_lighting_hemisphere(const Ray &r,
   L_out *= 2 * PI;
   // Average out num_samples
   L_out /= num_samples;
-  return L_out / 2;
+  return L_out ;
 }
 
 Vector3D
@@ -148,7 +148,7 @@ PathTracer::estimate_direct_lighting_importance(const Ray &r,
   }
 
   L_out /= num_samples;
-  return L_out / 2;
+  return L_out ;
 }
 
 Vector3D PathTracer::zero_bounce_radiance(const Ray &r,
@@ -181,19 +181,14 @@ Vector3D PathTracer::at_least_one_bounce_radiance(const Ray &r,
 
   Vector3D L_out(0, 0, 0);
 
-  // TODO: Part 4, Task 2
-  // Returns the one bounce radiance + radiance from extra bounces at this point.
-  // Should be called recursively to simulate extra bounces.
   double rr_terminate_p = 0.3;
   // first bounce OR later bounce lucky enough to pass the RR
   if ((r.depth == max_ray_depth) || (r.depth > 0 && !coin_flip(rr_terminate_p))) {
     // Get next bounce radiance
     if (!isect.bsdf->is_delta()){
       L_out += one_bounce_radiance(r, isect);
-      //return L_out;
     }
-    //L_out += one_bounce_radiance(r, isect);
-
+  
     // Recursion with depth - 1
     Vector3D w_in;
     double pdf;
@@ -207,9 +202,9 @@ Vector3D PathTracer::at_least_one_bounce_radiance(const Ray &r,
     Intersection in_isect;
 
     if (bvh->intersect(in_ray, &in_isect)) {
-      L_out += pdf * at_least_one_bounce_radiance(in_ray, in_isect)* bsdf * w_in.z / pdf;
+      L_out += at_least_one_bounce_radiance(in_ray, in_isect)* pdf;
       if (isect.bsdf->is_delta()){
-        L_out+= zero_bounce_radiance(in_ray, in_isect);
+         L_out+= zero_bounce_radiance(in_ray, in_isect);
       }
     }
   }
